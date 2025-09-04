@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      hrms_users: {
+        Row: {
+          addresses: string | null
+          company_joining_date: string | null
+          created_at: string
+          date_of_birth: string | null
+          department: string | null
+          designation: string | null
+          display_name: string | null
+          email: string | null
+          id: number
+          id_number: number | null
+          manager_name: string | null
+          name: string | null
+          phone_number: string | null
+          profile: string | null
+          team: string | null
+          user_status: boolean | null
+          username: string | null
+        }
+        Insert: {
+          addresses?: string | null
+          company_joining_date?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          department?: string | null
+          designation?: string | null
+          display_name?: string | null
+          email?: string | null
+          id?: number
+          id_number?: number | null
+          manager_name?: string | null
+          name?: string | null
+          phone_number?: string | null
+          profile?: string | null
+          team?: string | null
+          user_status?: boolean | null
+          username?: string | null
+        }
+        Update: {
+          addresses?: string | null
+          company_joining_date?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          department?: string | null
+          designation?: string | null
+          display_name?: string | null
+          email?: string | null
+          id?: number
+          id_number?: number | null
+          manager_name?: string | null
+          name?: string | null
+          phone_number?: string | null
+          profile?: string | null
+          team?: string | null
+          user_status?: boolean | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

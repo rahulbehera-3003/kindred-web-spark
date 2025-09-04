@@ -7,6 +7,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { UserPlus, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface CompanyModalProps {
   open: boolean;
@@ -15,16 +17,55 @@ interface CompanyModalProps {
 
 export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleManualAdd = () => {
     onOpenChange(false);
     navigate("/company");
   };
 
-  const handleHRMSIntegration = () => {
-    onOpenChange(false);
-    // TODO: Navigate to HRMS integration page
-    console.log("HRMS Integration selected");
+  const handleHRMSIntegration = async () => {
+    try {
+      console.log("Fetching HRMS users from Supabase...");
+      
+      const { data: hrmsUsers, error } = await supabase
+        .from('hrms_users')
+        .select('*');
+
+      if (error) {
+        console.error("Error fetching HRMS users:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch HRMS users: " + error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("HRMS Users fetched successfully:", hrmsUsers);
+      console.log(`Total users found: ${hrmsUsers?.length || 0}`);
+      
+      // Log each user for detailed inspection
+      if (hrmsUsers && hrmsUsers.length > 0) {
+        hrmsUsers.forEach((user, index) => {
+          console.log(`User ${index + 1}:`, user);
+        });
+      }
+
+      toast({
+        title: "HRMS Integration",
+        description: `Successfully fetched ${hrmsUsers?.length || 0} users from HRMS system. Check console for details.`,
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while fetching HRMS users.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
