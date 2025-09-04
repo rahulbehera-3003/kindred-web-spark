@@ -295,8 +295,8 @@ const HRMSData = () => {
           </div>
         </div>
 
-        {/* Next Button at Bottom */}
-        <div className="flex justify-center pt-6 border-t bg-background sticky bottom-0">
+        {/* Next Button at Bottom Right */}
+        <div className="flex justify-end pt-6 border-t bg-background sticky bottom-0">
           <Button
             size="lg"
             disabled={selectedTeams.length === 0 && selectedUsers.length === 0}
