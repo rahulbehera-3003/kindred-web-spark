@@ -299,7 +299,7 @@ const HRMSData = () => {
         <div className="flex justify-end pt-6 border-t bg-background sticky bottom-0">
           <Button
             size="lg"
-            disabled={selectedTeams.length === 0 && selectedUsers.length === 0}
+            disabled={selectedTeams.length === 0 || selectedUsers.length === 0}
             onClick={() => {
               console.log("Selected teams:", selectedTeams);
               console.log("Selected users:", selectedUsers);
