@@ -1,11 +1,9 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   Users, 
@@ -175,21 +173,10 @@ const ExpenseApprovalPolicy = () => {
           </Button>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="fields" className="space-y-6">
-          <TabsList className="grid w-fit grid-cols-3 bg-muted">
-            <TabsTrigger value="fields" className="data-[state=active]:bg-background">
-              Fields
-            </TabsTrigger>
-            <TabsTrigger value="options" className="data-[state=active]:bg-background">
-              Options
-            </TabsTrigger>
-            <TabsTrigger value="policies" className="data-[state=active]:bg-background">
-              Field Level Policies
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="fields" className="space-y-6">
+        {/* Policy Configuration */}
+        <div className="space-y-6">
+          {/* Fields Section */}
+          <div className="space-y-6">
             <div className="bg-card rounded-lg border">
               <div className="space-y-0">
                 {/* Receipts */}
@@ -300,9 +287,10 @@ const ExpenseApprovalPolicy = () => {
                 </div>
               </div>
             </div>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="options" className="space-y-6">
+          {/* Options Section */}
+          <div className="space-y-6">
             <div className="bg-card rounded-lg border">
               <div className="p-6 space-y-6">
                 <div>
@@ -345,9 +333,10 @@ const ExpenseApprovalPolicy = () => {
                 </div>
               </div>
             </div>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="policies" className="space-y-6">
+          {/* Team Policies Section */}
+          <div className="space-y-6">
             <div className="bg-card rounded-lg border">
               <div className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Team-wise Approval Policies</h3>
@@ -405,8 +394,8 @@ const ExpenseApprovalPolicy = () => {
                 </div>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
 
         {/* Save Button */}
         <div className="flex justify-end pt-6 border-t">
