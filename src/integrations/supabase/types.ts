@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      cards: {
+        Row: {
+          allowed_countries: string | null
+          card_holder_name: string | null
+          card_nickname: string | null
+          card_no: string | null
+          card_type: string | null
+          category_control: string | null
+          contactless_transactions: boolean | null
+          created_at: string
+          currency: string | null
+          daily_limit: number | null
+          expiry_mm: number | null
+          expiry_yy: number | null
+          funding_wallet: string | null
+          id: number
+          is_active: boolean | null
+          online_transactions: boolean | null
+          per_transaction_limit: boolean | null
+          spend_control_type: string | null
+          user_id: number | null
+        }
+        Insert: {
+          allowed_countries?: string | null
+          card_holder_name?: string | null
+          card_nickname?: string | null
+          card_no?: string | null
+          card_type?: string | null
+          category_control?: string | null
+          contactless_transactions?: boolean | null
+          created_at?: string
+          currency?: string | null
+          daily_limit?: number | null
+          expiry_mm?: number | null
+          expiry_yy?: number | null
+          funding_wallet?: string | null
+          id?: number
+          is_active?: boolean | null
+          online_transactions?: boolean | null
+          per_transaction_limit?: boolean | null
+          spend_control_type?: string | null
+          user_id?: number | null
+        }
+        Update: {
+          allowed_countries?: string | null
+          card_holder_name?: string | null
+          card_nickname?: string | null
+          card_no?: string | null
+          card_type?: string | null
+          category_control?: string | null
+          contactless_transactions?: boolean | null
+          created_at?: string
+          currency?: string | null
+          daily_limit?: number | null
+          expiry_mm?: number | null
+          expiry_yy?: number | null
+          funding_wallet?: string | null
+          id?: number
+          is_active?: boolean | null
+          online_transactions?: boolean | null
+          per_transaction_limit?: boolean | null
+          spend_control_type?: string | null
+          user_id?: number | null
+        }
+        Relationships: []
+      }
       hrms_users: {
         Row: {
           addresses: string | null
@@ -26,6 +92,7 @@ export type Database = {
           email: string | null
           id: number
           id_number: number | null
+          is_added: boolean | null
           manager_name: string | null
           name: string | null
           phone_number: string | null
@@ -45,6 +112,7 @@ export type Database = {
           email?: string | null
           id?: number
           id_number?: number | null
+          is_added?: boolean | null
           manager_name?: string | null
           name?: string | null
           phone_number?: string | null
@@ -64,6 +132,7 @@ export type Database = {
           email?: string | null
           id?: number
           id_number?: number | null
+          is_added?: boolean | null
           manager_name?: string | null
           name?: string | null
           phone_number?: string | null
@@ -71,6 +140,30 @@ export type Database = {
           team?: string | null
           user_status?: boolean | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: number
+          is_added: boolean | null
+          lead_user_id: number | null
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_added?: boolean | null
+          lead_user_id?: number | null
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_added?: boolean | null
+          lead_user_id?: number | null
+          name?: string | null
         }
         Relationships: []
       }
