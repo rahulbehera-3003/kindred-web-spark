@@ -29,14 +29,25 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
   const handleHRMSIntegration = async () => {
     setIsLoading(true);
     try {
-      console.log("Fetching HRMS users from Supabase...");
+      // Check Supabase connection status
+      console.log("🔌 Checking Supabase connection...");
+      console.log("Supabase URL:", "https://rtxkgingsusqacsquzqs.supabase.co");
+      console.log("Supabase client initialized:", !!supabase);
+      
+      console.log("📡 Fetching HRMS users from Supabase...");
       
       const { data: hrmsUsers, error } = await supabase
         .from('hrms_users')
         .select('*');
 
       if (error) {
-        console.error("Error fetching HRMS users:", error);
+        console.error("❌ Supabase connection failed or query error:", error);
+        console.error("Error details:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         toast({
           title: "Error",
           description: "Failed to fetch HRMS users: " + error.message,
@@ -45,14 +56,25 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
         return;
       }
 
-      console.log("HRMS Users fetched successfully:", hrmsUsers);
-      console.log(`Total users found: ${hrmsUsers?.length || 0}`);
+      console.log("✅ Supabase connection successful!");
+      console.log("📊 HRMS Users fetched successfully:", hrmsUsers);
+      console.log(`📈 Total users found: ${hrmsUsers?.length || 0}`);
       
       // Log each user for detailed inspection
       if (hrmsUsers && hrmsUsers.length > 0) {
+        console.log("👥 User details:");
         hrmsUsers.forEach((user, index) => {
-          console.log(`User ${index + 1}:`, user);
+          console.log(`User ${index + 1}:`, {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            team: user.team,
+            department: user.department,
+            status: user.user_status ? 'Active' : 'Inactive'
+          });
         });
+      } else {
+        console.log("⚠️ No users found in hrms_users table");
       }
 
       // Navigate to HRMS data page with the fetched data
@@ -60,7 +82,8 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
       navigate("/hrms-data", { state: { hrmsUsers } });
 
     } catch (error) {
-      console.error("Unexpected error:", error);
+      console.error("💥 Unexpected error during Supabase operation:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace available');
       toast({
         title: "Error",
         description: "An unexpected error occurred while fetching HRMS users.",
