@@ -22,10 +22,12 @@ import {
   Send,
   ChevronLeft,
   ChevronRight,
-  Users
+  Users,
+  CreditCard
 } from "lucide-react";
 import { CompanyModal } from "@/components/CompanyModal";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const employees = [
   {
@@ -82,6 +84,7 @@ const employees = [
 
 const Company = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -99,6 +102,14 @@ const Company = () => {
             <Button variant="ghost" size="sm" className="text-muted-foreground">
               <span className="mr-2">ℹ️</span>
               Learn More
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/cards")}
+              className="border-primary/20 text-primary hover:bg-primary/10"
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Manage Cards
             </Button>
             <Button className="bg-primary hover:bg-primary/90" onClick={handleOpenModal}>
               <UserPlus className="w-4 h-4 mr-2" />

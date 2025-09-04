@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Company from "./pages/Company";
 import HRMSData from "./pages/HRMSData";
 import ExpenseApprovalPolicy from "./pages/ExpenseApprovalPolicy";
+import Cards from "./pages/Cards";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/company" element={<Company />} />
           <Route path="/hrms-data" element={<HRMSData />} />
           <Route path="/expense-approval-policy" element={<ExpenseApprovalPolicy />} />
+          <Route path="/cards" element={<Cards />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
