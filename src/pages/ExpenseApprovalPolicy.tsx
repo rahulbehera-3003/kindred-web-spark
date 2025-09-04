@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   ArrowLeft, 
   Users, 
@@ -13,7 +16,11 @@ import {
   Lightbulb,
   Plus,
   Trash2,
-  HelpCircle
+  HelpCircle,
+  Settings,
+  Tag,
+  Calendar,
+  X
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -40,6 +47,15 @@ interface TeamPolicy {
   teamName: string;
   rules: ApprovalRule[];
   suggestions: string[];
+  expenseTags: string[];
+  submissionDeadline: string;
+  autoFreeze: boolean;
+  freezeDays: string;
+}
+
+interface TeamDialogData {
+  team: string;
+  isOpen: boolean;
 }
 
 const ExpenseApprovalPolicy = () => {
@@ -48,6 +64,8 @@ const ExpenseApprovalPolicy = () => {
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<HRMSUser[]>([]);
   const [teamPolicies, setTeamPolicies] = useState<TeamPolicy[]>([]);
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const [newTag, setNewTag] = useState<string>("");
 
   useEffect(() => {
     const { selectedTeams: teams = [], selectedUsers: userIds = [], hrmsUsers = [] } = location.state || {};
@@ -81,7 +99,11 @@ const ExpenseApprovalPolicy = () => {
             level: 1
           }
         ],
-        suggestions
+        suggestions,
+        expenseTags: ["Travel", "Meals", "Office Supplies"],
+        submissionDeadline: "2025-09-04",
+        autoFreeze: true,
+        freezeDays: "30"
       };
     });
 
@@ -136,6 +158,33 @@ const ExpenseApprovalPolicy = () => {
     const newPolicies = [...teamPolicies];
     newPolicies[teamIndex].rules[ruleIndex][field] = value as never;
     setTeamPolicies(newPolicies);
+  };
+
+  const addTag = (teamIndex: number) => {
+    if (newTag.trim()) {
+      const newPolicies = [...teamPolicies];
+      if (!newPolicies[teamIndex].expenseTags.includes(newTag.trim())) {
+        newPolicies[teamIndex].expenseTags.push(newTag.trim());
+        setTeamPolicies(newPolicies);
+      }
+      setNewTag("");
+    }
+  };
+
+  const removeTag = (teamIndex: number, tagToRemove: string) => {
+    const newPolicies = [...teamPolicies];
+    newPolicies[teamIndex].expenseTags = newPolicies[teamIndex].expenseTags.filter(tag => tag !== tagToRemove);
+    setTeamPolicies(newPolicies);
+  };
+
+  const updateTeamPolicy = (teamIndex: number, field: keyof TeamPolicy, value: string | boolean) => {
+    const newPolicies = [...teamPolicies];
+    newPolicies[teamIndex][field] = value as never;
+    setTeamPolicies(newPolicies);
+  };
+
+  const getTeamIndex = (teamName: string) => {
+    return teamPolicies.findIndex(policy => policy.teamName === teamName);
   };
 
   const handleSavePolicies = () => {
@@ -335,62 +384,223 @@ const ExpenseApprovalPolicy = () => {
             </div>
           </div>
 
-          {/* Team Policies Section */}
+          {/* Team List Section */}
           <div className="space-y-6">
             <div className="bg-card rounded-lg border">
               <div className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Team-wise Approval Policies</h3>
-                <div className="space-y-6">
-                  {selectedTeams.map((team) => (
-                    <div key={team} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <Badge variant="secondary" className="px-3 py-1">
-                          {team}
-                        </Badge>
-                        <Button variant="outline" size="sm">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Rule
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground mb-2">
-                        <div>Amount Range</div>
-                        <div>Approver</div>
-                        <div>Approval Type</div>
-                        <div>Actions</div>
-                      </div>
-                      
-                      <div className="grid grid-cols-4 gap-4 items-center py-2 border-t">
-                        <div className="flex gap-2">
-                          <Input placeholder="Min" className="text-sm" />
-                          <Input placeholder="Max" className="text-sm" />
-                        </div>
-                        <Select defaultValue="manager">
-                          <SelectTrigger className="text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background border shadow-lg z-50">
-                            <SelectItem value="manager">Manager</SelectItem>
-                            <SelectItem value="team-lead">Team Lead</SelectItem>
-                            <SelectItem value="finance">Finance Team</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Select defaultValue="single">
-                          <SelectTrigger className="text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background border shadow-lg z-50">
-                            <SelectItem value="single">Single Approval</SelectItem>
-                            <SelectItem value="dual">Dual Approval</SelectItem>
-                            <SelectItem value="multi">Multi-level</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                <h3 className="text-lg font-semibold mb-4">Team Configuration</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Click on a team to configure expense tags, submission deadlines, and approval policies.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {selectedTeams.map((team) => {
+                    const teamIndex = getTeamIndex(team);
+                    const teamPolicy = teamPolicies[teamIndex];
+                    
+                    return (
+                      <Dialog key={team} open={openDialog === team} onOpenChange={(open) => setOpenDialog(open ? team : null)}>
+                        <DialogTrigger asChild>
+                          <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Users className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium">{team}</h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {teamPolicy?.expenseTags.length || 0} tags configured
+                                  </p>
+                                </div>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Settings className="w-4 h-4" />
+                                <span>Configure team settings</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </DialogTrigger>
+                        
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-background border shadow-lg">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-3">
+                              <Badge variant="secondary">{team}</Badge>
+                              <span>Team Configuration</span>
+                            </DialogTitle>
+                          </DialogHeader>
+                          
+                          {teamPolicy && (
+                            <div className="space-y-6 mt-6">
+                              {/* Expense Tags Section */}
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                  <Tag className="w-5 h-5 text-primary" />
+                                  <h4 className="font-semibold">Expense Tags</h4>
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                  {teamPolicy.expenseTags.map((tag, index) => (
+                                    <Badge key={index} variant="outline" className="flex items-center gap-1">
+                                      {tag}
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                                        onClick={() => removeTag(teamIndex, tag)}
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </Badge>
+                                  ))}
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <Input
+                                    placeholder="Add new expense tag"
+                                    value={newTag}
+                                    onChange={(e) => setNewTag(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && addTag(teamIndex)}
+                                    className="flex-1"
+                                  />
+                                  <Button onClick={() => addTag(teamIndex)} size="sm">
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Tag
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              {/* Expense Submission Section */}
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-5 h-5 text-primary" />
+                                  <h4 className="font-semibold">Expense Submission</h4>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label>Submission Deadline</Label>
+                                    <Input
+                                      type="date"
+                                      value={teamPolicy.submissionDeadline}
+                                      onChange={(e) => updateTeamPolicy(teamIndex, 'submissionDeadline', e.target.value)}
+                                    />
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <Label>Auto-freeze after (days)</Label>
+                                    <Select 
+                                      value={teamPolicy.freezeDays} 
+                                      onValueChange={(value) => updateTeamPolicy(teamIndex, 'freezeDays', value)}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-background border shadow-lg z-50">
+                                        <SelectItem value="7">7 days</SelectItem>
+                                        <SelectItem value="14">14 days</SelectItem>
+                                        <SelectItem value="30">30 days</SelectItem>
+                                        <SelectItem value="60">60 days</SelectItem>
+                                        <SelectItem value="90">90 days</SelectItem>
+                                        <SelectItem value="never">Never</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Approval Rules Section */}
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <DollarSign className="w-5 h-5 text-primary" />
+                                    <h4 className="font-semibold">Approval Rules</h4>
+                                  </div>
+                                  <Button variant="outline" size="sm" onClick={() => addRule(teamIndex)}>
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Rule
+                                  </Button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                  {teamPolicy.rules.map((rule, ruleIndex) => (
+                                    <div key={rule.id} className="border rounded-lg p-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div className="space-y-2">
+                                          <Label className="text-sm">Min Amount ($)</Label>
+                                          <Input
+                                            type="number"
+                                            value={rule.minAmount}
+                                            onChange={(e) => updateRule(teamIndex, ruleIndex, 'minAmount', e.target.value)}
+                                            placeholder="0"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label className="text-sm">Max Amount ($)</Label>
+                                          <Input
+                                            type="number"
+                                            value={rule.maxAmount}
+                                            onChange={(e) => updateRule(teamIndex, ruleIndex, 'maxAmount', e.target.value)}
+                                            placeholder="1000"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label className="text-sm">Approver</Label>
+                                          <Select 
+                                            value={rule.approver} 
+                                            onValueChange={(value) => updateRule(teamIndex, ruleIndex, 'approver', value)}
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-background border shadow-lg z-50">
+                                              <SelectItem value="manager">Manager</SelectItem>
+                                              <SelectItem value="team-lead">Team Lead</SelectItem>
+                                              <SelectItem value="finance">Finance Team</SelectItem>
+                                              <SelectItem value="director">Director</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        <div className="flex items-end">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeRule(teamIndex, ruleIndex)}
+                                            className="text-destructive hover:bg-destructive/10"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              {/* Suggestions Section */}
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                  <Lightbulb className="w-5 h-5 text-primary" />
+                                  <h4 className="font-semibold">AI Suggestions</h4>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  {teamPolicy.suggestions.map((suggestion, index) => (
+                                    <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                                      <AlertCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                                      <p className="text-sm">{suggestion}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                    );
+                  })}
                 </div>
               </div>
             </div>
