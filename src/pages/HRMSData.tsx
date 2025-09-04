@@ -75,7 +75,7 @@ const HRMSData = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-8 space-y-6">
+      <div className="p-8 space-y-6 min-h-screen flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ const HRMSData = () => {
         </div>
 
         {/* Selection Interface */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
           {/* Teams Selection */}
           <div className="bg-card rounded-lg border">
             <div className="p-6 border-b">
@@ -295,8 +295,8 @@ const HRMSData = () => {
           </div>
         </div>
 
-        {/* Next Button */}
-        <div className="flex justify-end">
+        {/* Next Button at Bottom */}
+        <div className="flex justify-center pt-6 border-t bg-background sticky bottom-0">
           <Button
             size="lg"
             disabled={selectedTeams.length === 0 && selectedUsers.length === 0}
@@ -305,7 +305,7 @@ const HRMSData = () => {
               console.log("Selected users:", selectedUsers);
               // TODO: Navigate to next step or process selections
             }}
-            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50 px-8 py-3"
           >
             Next Step
             <ChevronRight className="w-4 h-4 ml-2" />
