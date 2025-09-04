@@ -2,6 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -15,7 +16,9 @@ import {
   CreditCard,
   Plus,
   HelpCircle,
-  Settings
+  Settings,
+  Building,
+  Gift
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -41,6 +44,7 @@ const Cards = () => {
   const [companyCards, setCompanyCards] = useState<CardData[]>([]);
   const [employeeBenefitCards, setEmployeeBenefitCards] = useState<CardData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddCardDialogOpen, setIsAddCardDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchCardData();
@@ -157,10 +161,48 @@ const Cards = () => {
               Settings
             </Button>
           )}
-          <Button size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Card
-          </Button>
+          <Dialog open={isAddCardDialogOpen} onOpenChange={setIsAddCardDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Card
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Card</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-6">
+                <Button
+                  variant="outline"
+                  className="w-full h-20 flex flex-col items-center justify-center gap-2 border-2 hover:border-primary/50"
+                  onClick={() => {
+                    setIsAddCardDialogOpen(false);
+                    // Navigate to company card creation
+                    console.log('Create Company Card');
+                  }}
+                >
+                  <Building className="w-6 h-6 text-primary" />
+                  <span className="font-medium">Company Card</span>
+                  <span className="text-xs text-muted-foreground">For business expenses</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full h-20 flex flex-col items-center justify-center gap-2 border-2 hover:border-primary/50"
+                  onClick={() => {
+                    setIsAddCardDialogOpen(false);
+                    // Navigate to employee benefit card creation
+                    console.log('Create Employee Benefit Card');
+                  }}
+                >
+                  <Gift className="w-6 h-6 text-primary" />
+                  <span className="font-medium">Employee Benefit Card</span>
+                  <span className="text-xs text-muted-foreground">For employee benefits</span>
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       
