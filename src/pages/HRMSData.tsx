@@ -18,10 +18,12 @@ import {
   UserCheck,
   Calendar,
   Mail,
-  Phone
+  Phone,
+  ChevronRight
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface HRMSUser {
   id: number;
@@ -41,6 +43,8 @@ const HRMSData = () => {
   const navigate = useNavigate();
   const [hrmsUsers, setHrmsUsers] = useState<HRMSUser[]>([]);
   const [teams, setTeams] = useState<string[]>([]);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
 
   useEffect(() => {
     const users: HRMSUser[] = location.state?.hrmsUsers || [];
@@ -134,121 +138,179 @@ const HRMSData = () => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="employees" className="space-y-6">
-          <TabsList className="grid w-fit grid-cols-2 bg-muted">
-            <TabsTrigger value="employees" className="data-[state=active]:bg-transparent hover:bg-primary/20">
-              All Employees
-            </TabsTrigger>
-            <TabsTrigger value="teams" className="data-[state=active]:bg-transparent hover:bg-primary/20">
-              Teams
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="employees" className="space-y-6">
-            <div className="bg-card rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Designation</TableHead>
-                    <TableHead>Manager</TableHead>
-                    <TableHead>Joining Date</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {hrmsUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">
-                              {getInitials(user.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{user.name}</p>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Mail className="w-3 h-3" />
-                              {user.email}
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.department || 'N/A'}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{user.team || 'N/A'}</Badge>
-                      </TableCell>
-                      <TableCell>{user.designation || 'N/A'}</TableCell>
-                      <TableCell>{user.manager_name || 'N/A'}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(user.company_joining_date)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.user_status ? "default" : "secondary"}>
-                          {user.user_status ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+        {/* Selection Interface */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Teams Selection */}
+          <div className="bg-card rounded-lg border">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Select Teams</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedTeams.length} of {teams.length} selected
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedTeams(teams)}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedTeams([])}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="teams" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
               {teams.map((team) => {
                 const teamUsers = getUsersByTeam(team);
+                const isSelected = selectedTeams.includes(team);
+                
                 return (
-                  <div key={team} className="bg-card rounded-lg border p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{team}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {teamUsers.length} {teamUsers.length === 1 ? 'member' : 'members'}
-                        </p>
-                      </div>
+                  <div
+                    key={team}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 ${
+                      isSelected ? 'bg-primary/5 border-primary/20' : 'bg-background'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedTeams(selectedTeams.filter(t => t !== team));
+                      } else {
+                        setSelectedTeams([...selectedTeams, team]);
+                      }
+                    }}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedTeams([...selectedTeams, team]);
+                        } else {
+                          setSelectedTeams(selectedTeams.filter(t => t !== team));
+                        }
+                      }}
+                    />
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Building2 className="w-4 h-4 text-primary" />
                     </div>
-                    
-                    <div className="space-y-3">
-                      {teamUsers.slice(0, 3).map((user) => (
-                        <div key={user.id} className="flex items-center gap-3">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="text-xs">
-                              {getInitials(user.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{user.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {user.designation || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {teamUsers.length > 3 && (
-                        <p className="text-xs text-muted-foreground">
-                          +{teamUsers.length - 3} more members
-                        </p>
-                      )}
+                    <div className="flex-1">
+                      <p className="font-medium">{team}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {teamUsers.length} {teamUsers.length === 1 ? 'member' : 'members'}
+                      </p>
                     </div>
                   </div>
                 );
               })}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Employees Selection */}
+          <div className="bg-card rounded-lg border">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Select Employees</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedUsers.length} of {hrmsUsers.length} selected
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedUsers(hrmsUsers.map(user => user.id))}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedUsers([])}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
+              {hrmsUsers.map((user) => {
+                const isSelected = selectedUsers.includes(user.id);
+                
+                return (
+                  <div
+                    key={user.id}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 ${
+                      isSelected ? 'bg-primary/5 border-primary/20' : 'bg-background'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+                      } else {
+                        setSelectedUsers([...selectedUsers, user.id]);
+                      }
+                    }}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedUsers([...selectedUsers, user.id]);
+                        } else {
+                          setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+                        }
+                      }}
+                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{user.name}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Badge variant="secondary" className="text-xs">
+                          {user.team || 'No Team'}
+                        </Badge>
+                        <span>•</span>
+                        <span>{user.designation || 'N/A'}</span>
+                      </div>
+                    </div>
+                    <Badge variant={user.user_status ? "default" : "secondary"} className="text-xs">
+                      {user.user_status ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Next Button */}
+        <div className="flex justify-end">
+          <Button
+            size="lg"
+            disabled={selectedTeams.length === 0 && selectedUsers.length === 0}
+            onClick={() => {
+              console.log("Selected teams:", selectedTeams);
+              console.log("Selected users:", selectedUsers);
+              // TODO: Navigate to next step or process selections
+            }}
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+          >
+            Next Step
+            <ChevronRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
       </div>
     </DashboardLayout>
   );
