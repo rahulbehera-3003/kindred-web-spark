@@ -60,7 +60,7 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
       
       console.log("📡 Fetching teams and users from Supabase...");
       
-      // First, fetch all teams - use any cast to bypass TypeScript issues
+      // First, fetch all teams
       const teamsResponse = await (supabase as any)
         .from('teams')
         .select('*');
@@ -80,6 +80,24 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
       console.log("✅ Teams fetched successfully:", teams);
       console.log(`📈 Total teams found: ${teams?.length || 0}`);
 
+      // Fetch all users from hrms_users (no filtering by is_added)
+      const { data: allUsers, error: allUsersError } = await (supabase as any)
+        .from('hrms_users')
+        .select('*');
+
+      if (allUsersError) {
+        console.error("❌ Failed to fetch users:", allUsersError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch users: " + allUsersError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("✅ All users fetched successfully:", allUsers);
+      console.log(`📈 Total users found: ${allUsers?.length || 0}`);
+
       if (!teams || teams.length === 0) {
         console.log("⚠️ No teams found in teams table");
         toast({
@@ -90,63 +108,65 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
         return;
       }
 
-      // For each team, fetch users where is_added = true and team matches team name
+      if (!allUsers || allUsers.length === 0) {
+        console.log("⚠️ No users found in hrms_users table");
+        toast({
+          title: "No Users Found",
+          description: "No users found in the database.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // For each team, match users where team field matches team name
       const teamsWithUsers: TeamWithUsers[] = [];
       
       for (const teamData of teams as TeamData[]) {
-        console.log(`👥 Fetching users for team: ${teamData.name}`);
+        console.log(`👥 Matching users for team: ${teamData.name}`);
         
-        const { data: users, error: usersError } = await (supabase as any)
-          .from('hrms_users')
-          .select('*')
-          .eq('team', teamData.name)
-          .eq('is_added', true);
+        // Filter users where user.team matches team.name
+        const teamUsers = (allUsers as any[]).filter(user => 
+          user.team && user.team.toString().trim().toLowerCase() === teamData.name.toString().trim().toLowerCase()
+        );
 
-        if (usersError) {
-          console.error(`❌ Failed to fetch users for team ${teamData.name}:`, usersError);
-          teamsWithUsers.push({
-            ...teamData,
-            users: []
-          });
-          continue;
+        console.log(`📊 Users found for team ${teamData.name}:`, teamUsers.length);
+        
+        if (teamUsers.length > 0) {
+          console.log("👤 Team users:", teamUsers.map(u => ({ name: u.name, team: u.team, id: u.id })));
         }
-
-        console.log(`📊 Users found for team ${teamData.name}:`, users?.length || 0);
 
         // For each user, fetch their cards
         const usersWithCards: UserWithCards[] = [];
         
-        if (users && users.length > 0) {
-          for (const userData of users as any[]) {
-            console.log(`💳 Fetching cards for user: ${userData.name} (ID: ${userData.id})`);
-            
-            // Fetch cards using any cast to bypass TypeScript issues
-            const cardsResponse = await (supabase as any)
-              .from('cards')
-              .select('*')
-              .eq('user_id', userData.id);
+        for (const userData of teamUsers) {
+          console.log(`💳 Fetching cards for user: ${userData.name} (ID: ${userData.id})`);
+          
+          // Fetch cards using any cast to bypass TypeScript issues
+          const cardsResponse = await (supabase as any)
+            .from('cards')
+            .select('*')
+            .eq('user_id', userData.id);
 
-            const { data: cards, error: cardsError } = cardsResponse;
+          const { data: cards, error: cardsError } = cardsResponse;
 
-            if (cardsError) {
-              console.error(`❌ Failed to fetch cards for user ${userData.id}:`, cardsError);
-            }
-
-            console.log(`💳 Cards found for user ${userData.name}:`, cards?.length || 0);
-
-            usersWithCards.push({
-              id: userData.id,
-              name: userData.name,
-              email: userData.email,
-              team: userData.team,
-              department: userData.department,
-              designation: userData.designation,
-              manager_name: userData.manager_name,
-              user_status: userData.user_status,
-              is_added: userData.is_added,
-              cards: cards || []
-            });
+          if (cardsError) {
+            console.error(`❌ Failed to fetch cards for user ${userData.id}:`, cardsError);
           }
+
+          console.log(`💳 Cards found for user ${userData.name}:`, cards?.length || 0);
+
+          usersWithCards.push({
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            team: userData.team,
+            department: userData.department,
+            designation: userData.designation,
+            manager_name: userData.manager_name,
+            user_status: userData.user_status,
+            is_added: userData.is_added,
+            cards: cards || []
+          });
         }
 
         teamsWithUsers.push({
@@ -165,6 +185,14 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
       );
       
       console.log(`📈 Summary: ${teamsWithUsers.length} teams, ${totalUsers} users, ${totalCards} cards`);
+
+      // Also log team-by-team summary
+      teamsWithUsers.forEach(team => {
+        console.log(`📋 Team "${team.name}": ${team.users.length} users`);
+        team.users.forEach(user => {
+          console.log(`  - ${user.name} (${user.cards?.length || 0} cards)`);
+        });
+      });
 
       // Navigate to HRMS data page with the structured data
       onOpenChange(false);
