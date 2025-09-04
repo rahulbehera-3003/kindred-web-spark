@@ -26,7 +26,8 @@ const CreateEmployeeBenefitCard = () => {
   
   const [formData, setFormData] = useState({
     userId: "",
-    cardNickname: ""
+    cardNickname: "",
+    cardType: ""
   });
 
   useEffect(() => {
@@ -66,7 +67,7 @@ const CreateEmployeeBenefitCard = () => {
 
   const handleSave = async () => {
     // Validate form
-    if (!formData.userId || !formData.cardNickname) {
+    if (!formData.userId || !formData.cardNickname || !formData.cardType) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -86,10 +87,11 @@ const CreateEmployeeBenefitCard = () => {
           {
             user_id: parseInt(formData.userId),
             card_holder_name: selectedEmployee?.name || '',
+            card_nickname: formData.cardNickname,
             card_no: `****-****-****-${Math.floor(1000 + Math.random() * 9000)}`,
             expiry_mm: 12,
             expiry_yy: 25,
-            card_type: "employee_benefit"
+            card_type: formData.cardType
           }
         ]);
 
@@ -192,6 +194,25 @@ const CreateEmployeeBenefitCard = () => {
                     onChange={(e) => handleInputChange('cardNickname', e.target.value)}
                     placeholder="Enter card name (e.g., Birthday Card, Wellness Card)"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cardType">Card Type *</Label>
+                  <Select value={formData.cardType} onValueChange={(value) => handleInputChange('cardType', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select card type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="wellness">Wellness Benefits</SelectItem>
+                      <SelectItem value="transportation">Transportation</SelectItem>
+                      <SelectItem value="meal_voucher">Meal Voucher</SelectItem>
+                      <SelectItem value="gym_membership">Gym Membership</SelectItem>
+                      <SelectItem value="learning_development">Learning & Development</SelectItem>
+                      <SelectItem value="birthday_gift">Birthday Gift</SelectItem>
+                      <SelectItem value="performance_bonus">Performance Bonus</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
