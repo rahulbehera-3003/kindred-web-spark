@@ -100,8 +100,8 @@ const ExpenseApprovalPolicy = () => {
 
   const handleSavePolicies = () => {
     console.log("Saving expense approval policies:", teamPolicies);
-    // TODO: Save policies to backend
-    navigate("/company");
+    // Navigate to card approval flow with the team policies data
+    navigate("/card-approval-flow", { state: { teamPolicies } });
   };
 
   return (
@@ -262,11 +262,11 @@ const ExpenseApprovalPolicy = () => {
           </div>
         </div>
 
-        {/* Save Button */}
+        {/* Next Button */}
         <div className="flex justify-end pt-6 border-t">
           <Button onClick={handleSavePolicies} className="bg-primary hover:bg-primary/90">
             <Save className="w-4 h-4 mr-2" />
-            Save Policies
+            Next
           </Button>
         </div>
       </div>

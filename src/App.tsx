@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Company from "./pages/Company";
 import HRMSData from "./pages/HRMSData";
 import ExpenseApprovalPolicy from "./pages/ExpenseApprovalPolicy";
+import CardApprovalFlow from "./pages/CardApprovalFlow";
 import Cards from "./pages/Cards";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/company" element={<Company />} />
           <Route path="/hrms-data" element={<HRMSData />} />
           <Route path="/expense-approval-policy" element={<ExpenseApprovalPolicy />} />
+          <Route path="/card-approval-flow" element={<CardApprovalFlow />} />
           <Route path="/cards" element={<Cards />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
