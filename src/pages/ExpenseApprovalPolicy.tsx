@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   Users, 
@@ -13,7 +14,8 @@ import {
   AlertCircle,
   Lightbulb,
   Plus,
-  Trash2
+  Trash2,
+  HelpCircle
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -156,193 +158,262 @@ const ExpenseApprovalPolicy = () => {
               onClick={() => navigate("/hrms-data")}
               className="text-muted-foreground hover:text-foreground"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to HRMS Data
+              <ArrowLeft className="w-4 h-4" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Expense Approval Policies</h1>
-              <p className="text-muted-foreground">
-                Create approval workflows for {selectedTeams.length} selected teams
+              <h1 className="text-2xl font-bold text-foreground">Edit expense approval policy</h1>
+              <p className="text-sm text-muted-foreground mt-2 max-w-4xl">
+                Set up spending policies and specify mandatory fields for expense submissions. Set up controls to flag transactions that fall outside policy 
+                guidelines. Please note that these adjustments will be applied only to transactions happened after the modification and to any older transactions 
+                that have not yet been approved.
               </p>
             </div>
           </div>
-          <Button onClick={handleSavePolicies} className="bg-primary hover:bg-primary/90">
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Save All Policies
+          <Button variant="ghost" size="sm" className="text-muted-foreground">
+            <HelpCircle className="w-4 h-4 mr-2" />
+            Learn More
           </Button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Selected Teams</p>
-                  <p className="text-2xl font-bold">{selectedTeams.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Selected Users</p>
-                  <p className="text-2xl font-bold">{selectedUsers.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Policies</p>
-                  <p className="text-2xl font-bold">{teamPolicies.reduce((acc, policy) => acc + policy.rules.length, 0)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Tabs */}
+        <Tabs defaultValue="fields" className="space-y-6">
+          <TabsList className="grid w-fit grid-cols-3 bg-muted">
+            <TabsTrigger value="fields" className="data-[state=active]:bg-background">
+              Fields
+            </TabsTrigger>
+            <TabsTrigger value="options" className="data-[state=active]:bg-background">
+              Options
+            </TabsTrigger>
+            <TabsTrigger value="policies" className="data-[state=active]:bg-background">
+              Field Level Policies
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Team Policies */}
-        <div className="space-y-8">
-          {teamPolicies.map((policy, teamIndex) => (
-            <Card key={policy.teamName} className="border-2">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary" className="px-3 py-1">
-                      {policy.teamName}
-                    </Badge>
-                    <CardTitle className="text-xl">Expense Approval Policy</CardTitle>
+          <TabsContent value="fields" className="space-y-6">
+            <div className="bg-card rounded-lg border">
+              <div className="space-y-0">
+                {/* Receipts */}
+                <div className="flex items-center border-b p-6">
+                  <div className="w-48">
+                    <Label className="text-base font-medium">Receipts</Label>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addRule(teamIndex)}
-                    className="text-primary hover:bg-primary/10"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Rule
-                  </Button>
-                </div>
-                <CardDescription>
-                  Configure approval workflows and spending limits for the {policy.teamName} team
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                {/* Suggestions */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-blue-900 mb-2">Suggestions for {policy.teamName}</h4>
-                      <ul className="space-y-1 text-sm text-blue-800">
-                        {policy.suggestions.map((suggestion, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-blue-600">•</span>
-                            <span>{suggestion}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="flex-1">
+                    <Select defaultValue="optional">
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="optional">Optional</SelectItem>
+                        <SelectItem value="required">Required</SelectItem>
+                        <SelectItem value="not-required">Not Required</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                {/* Approval Rules */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-foreground">Approval Rules</h4>
-                  {policy.rules.map((rule, ruleIndex) => (
-                    <div key={rule.id} className="border rounded-lg p-4 bg-muted/20">
+                {/* Memo */}
+                <div className="flex items-center border-b p-6">
+                  <div className="w-48">
+                    <Label className="text-base font-medium">Memo</Label>
+                  </div>
+                  <div className="flex-1">
+                    <Select defaultValue="not-required">
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="optional">Optional</SelectItem>
+                        <SelectItem value="required">Required</SelectItem>
+                        <SelectItem value="not-required">Not Required</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div className="flex items-center border-b p-6">
+                  <div className="w-48">
+                    <Label className="text-base font-medium">Category</Label>
+                  </div>
+                  <div className="flex-1 flex gap-4">
+                    <Select defaultValue="optional">
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="optional">Optional</SelectItem>
+                        <SelectItem value="required">Required</SelectItem>
+                        <SelectItem value="not-required">Not Required</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="travel">Travel</SelectItem>
+                        <SelectItem value="meals">Meals</SelectItem>
+                        <SelectItem value="office">Office Supplies</SelectItem>
+                        <SelectItem value="software">Software</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="flex items-center border-b p-6">
+                  <div className="w-48">
+                    <Label className="text-base font-medium">Location</Label>
+                  </div>
+                  <div className="flex-1">
+                    <Select defaultValue="optional">
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="optional">Optional</SelectItem>
+                        <SelectItem value="required">Required</SelectItem>
+                        <SelectItem value="not-required">Not Required</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Approval Limits */}
+                <div className="flex items-center p-6">
+                  <div className="w-48">
+                    <Label className="text-base font-medium">Approval Limits</Label>
+                  </div>
+                  <div className="flex-1">
+                    <Select defaultValue="team-based">
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="team-based">Team Based</SelectItem>
+                        <SelectItem value="amount-based">Amount Based</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="options" className="space-y-6">
+            <div className="bg-card rounded-lg border">
+              <div className="p-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Expense submission timeline</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Establish submission deadlines for employees&apos; expense reports. Cards with overdue submissions will be automatically frozen until expenses are 
+                    submitted.
+                  </p>
+                  
+                  <div className="flex items-center gap-4 mb-6">
+                    <Label className="text-base font-medium w-64">Auto freeze card if expense is not submitted after</Label>
+                    <Select defaultValue="never">
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="never">Never</SelectItem>
+                        <SelectItem value="7">7</SelectItem>
+                        <SelectItem value="14">14</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="60">60</SelectItem>
+                        <SelectItem value="90">90</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Label className="text-base">days</Label>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <Label className="text-base font-medium w-64">Apply to expenses from</Label>
+                    <Input 
+                      type="date" 
+                      defaultValue="2025-09-04"
+                      className="w-48"
+                    />
+                  </div>
+
+                  <p className="text-xs text-muted-foreground mt-4">
+                    The earliest expense pending submission in your company: 21 March 2025
+                  </p>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="policies" className="space-y-6">
+            <div className="bg-card rounded-lg border">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Team-wise Approval Policies</h3>
+                <div className="space-y-6">
+                  {selectedTeams.map((team) => (
+                    <div key={team} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-4">
-                        <Badge variant="outline">Level {rule.level}</Badge>
-                        {policy.rules.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeRule(teamIndex, ruleIndex)}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
+                        <Badge variant="secondary" className="px-3 py-1">
+                          {team}
+                        </Badge>
+                        <Button variant="outline" size="sm">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Rule
+                        </Button>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                          <Label htmlFor={`min-${rule.id}`}>Min Amount ($)</Label>
-                          <Input
-                            id={`min-${rule.id}`}
-                            type="number"
-                            placeholder="0"
-                            value={rule.minAmount}
-                            onChange={(e) => updateRule(teamIndex, ruleIndex, "minAmount", e.target.value)}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor={`max-${rule.id}`}>Max Amount ($)</Label>
-                          <Input
-                            id={`max-${rule.id}`}
-                            type="number"
-                            placeholder="1000"
-                            value={rule.maxAmount}
-                            onChange={(e) => updateRule(teamIndex, ruleIndex, "maxAmount", e.target.value)}
-                          />
-                        </div>
-                        
-                        <div className="md:col-span-2">
-                          <Label htmlFor={`approver-${rule.id}`}>Approver</Label>
-                          <Select
-                            value={rule.approver}
-                            onValueChange={(value) => updateRule(teamIndex, ruleIndex, "approver", value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select approver" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-background border shadow-lg z-50">
-                              <SelectItem value="Team Lead">Team Lead</SelectItem>
-                              <SelectItem value="Department Manager">Department Manager</SelectItem>
-                              <SelectItem value="Finance Team">Finance Team</SelectItem>
-                              <SelectItem value="CEO">CEO</SelectItem>
-                              {/* Add managers from the team */}
-                              {selectedUsers
-                                .filter(user => user.team === policy.teamName && user.manager_name)
-                                .map(user => (
-                                  <SelectItem key={user.manager_name} value={user.manager_name}>
-                                    {user.manager_name}
-                                  </SelectItem>
-                                ))
-                              }
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground mb-2">
+                        <div>Amount Range</div>
+                        <div>Approver</div>
+                        <div>Approval Type</div>
+                        <div>Actions</div>
                       </div>
                       
-                      <div className="mt-3 text-sm text-muted-foreground">
-                        <AlertCircle className="w-4 h-4 inline mr-2" />
-                        Expenses between ${rule.minAmount || "0"} - ${rule.maxAmount || "∞"} require approval from {rule.approver || "selected approver"}
+                      <div className="grid grid-cols-4 gap-4 items-center py-2 border-t">
+                        <div className="flex gap-2">
+                          <Input placeholder="Min" className="text-sm" />
+                          <Input placeholder="Max" className="text-sm" />
+                        </div>
+                        <Select defaultValue="manager">
+                          <SelectTrigger className="text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border shadow-lg z-50">
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="team-lead">Team Lead</SelectItem>
+                            <SelectItem value="finance">Finance Team</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select defaultValue="single">
+                          <SelectTrigger className="text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border shadow-lg z-50">
+                            <SelectItem value="single">Single Approval</SelectItem>
+                            <SelectItem value="dual">Dual Approval</SelectItem>
+                            <SelectItem value="multi">Multi-level</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Save Button */}
+        <div className="flex justify-end pt-6 border-t">
+          <Button onClick={handleSavePolicies} className="bg-primary hover:bg-primary/90">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Save Policy
+          </Button>
         </div>
       </div>
     </DashboardLayout>
