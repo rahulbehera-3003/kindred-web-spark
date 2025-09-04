@@ -10,6 +10,7 @@ import ExpenseApprovalPolicy from "./pages/ExpenseApprovalPolicy";
 import CardApprovalFlow from "./pages/CardApprovalFlow";
 import Cards from "./pages/Cards";
 import EmployeeBenefitsAutomation from "./pages/EmployeeBenefitsAutomation";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/card-approval-flow" element={<CardApprovalFlow />} />
           <Route path="/cards" element={<Cards />} />
           <Route path="/employee-benefits-automation" element={<EmployeeBenefitsAutomation />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
