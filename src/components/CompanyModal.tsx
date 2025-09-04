@@ -194,9 +194,35 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
         });
       });
 
-      // Navigate to HRMS data page with the structured data
+      // Update is_added field to true for all fetched users
+      console.log("🔄 Updating is_added field to true for all users...");
+      const allUserIds = teamsWithUsers.flatMap(team => team.users.map(user => user.id));
+      
+      if (allUserIds.length > 0) {
+        try {
+          const { error: updateError } = await (supabase as any)
+            .from('hrms_users')
+            .update({ is_added: true })
+            .in('id', allUserIds);
+            
+          if (updateError) {
+            console.error("❌ Failed to update is_added field:", updateError);
+          } else {
+            console.log("✅ Successfully updated is_added field for", allUserIds.length, "users");
+          }
+        } catch (updateErr) {
+          console.error("💥 Error updating is_added field:", updateErr);
+        }
+      }
+
+      // Navigate directly to company page instead of HRMS data page
       onOpenChange(false);
-      navigate("/hrms-data", { state: { teams: teamsWithUsers } });
+      toast({
+        title: "Success",
+        description: `Successfully imported ${totalUsers} employees from ${teamsWithUsers.length} teams`,
+        variant: "default",
+      });
+      navigate("/company");
 
     } catch (error) {
       console.error("💥 Unexpected error during Supabase operation:", error);
