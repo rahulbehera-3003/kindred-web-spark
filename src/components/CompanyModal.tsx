@@ -38,20 +38,6 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
         
         <div className="space-y-4 py-4">
           <Button
-            onClick={handleManualAdd}
-            variant="outline"
-            className="w-full h-16 flex items-center gap-4 hover:bg-primary/10 border-2 hover:border-primary/30"
-          >
-            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-primary" />
-            </div>
-            <div className="text-left">
-              <div className="font-medium text-foreground">Manually Add Employee</div>
-              <div className="text-sm text-muted-foreground">Add employees one by one</div>
-            </div>
-          </Button>
-
-          <Button
             onClick={handleHRMSIntegration}
             variant="outline"
             className="w-full h-16 flex items-center gap-4 hover:bg-primary/10 border-2 hover:border-primary/30"
@@ -62,6 +48,20 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
             <div className="text-left">
               <div className="font-medium text-foreground">Integrate with HRMS System</div>
               <div className="text-sm text-muted-foreground">Connect your existing HR system</div>
+            </div>
+          </Button>
+
+          <Button
+            onClick={handleManualAdd}
+            variant="outline"
+            className="w-full h-16 flex items-center gap-4 hover:bg-primary/10 border-2 hover:border-primary/30"
+          >
+            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-primary" />
+            </div>
+            <div className="text-left">
+              <div className="font-medium text-foreground">Manually Add Employee</div>
+              <div className="text-sm text-muted-foreground">Add employees one by one</div>
             </div>
           </Button>
         </div>
