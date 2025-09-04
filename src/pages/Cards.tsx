@@ -178,8 +178,7 @@ const Cards = () => {
                   className="w-full h-20 flex flex-col items-center justify-center gap-2 border-2 hover:border-primary/50"
                   onClick={() => {
                     setIsAddCardDialogOpen(false);
-                    // Navigate to company card creation
-                    console.log('Create Company Card');
+                    navigate('/create-company-card');
                   }}
                 >
                   <Building className="w-6 h-6 text-primary" />
@@ -192,8 +191,7 @@ const Cards = () => {
                   className="w-full h-20 flex flex-col items-center justify-center gap-2 border-2 hover:border-primary/50"
                   onClick={() => {
                     setIsAddCardDialogOpen(false);
-                    // Navigate to employee benefit card creation
-                    console.log('Create Employee Benefit Card');
+                    navigate('/create-employee-benefit-card');
                   }}
                 >
                   <Gift className="w-6 h-6 text-primary" />
