@@ -83,7 +83,7 @@ export const Sidebar = () => {
             onClick={() => handleMenuClick(item)}
             className={cn(
               "w-full justify-start px-6 py-3 text-dashboard-sidebar-foreground hover:bg-dashboard-sidebar-muted rounded-none",
-              location.pathname === item.path && "bg-dashboard-sidebar-accent text-primary"
+              location.pathname === item.path && "bg-transparent text-primary border-l-2 border-primary"
             )}
           >
             <item.icon className="w-5 h-5 mr-3" />
