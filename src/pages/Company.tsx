@@ -24,6 +24,8 @@ import {
   ChevronRight,
   Users
 } from "lucide-react";
+import { CompanyModal } from "@/components/CompanyModal";
+import { useState } from "react";
 
 const employees = [
   {
@@ -79,6 +81,12 @@ const employees = [
 ];
 
 const Company = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <DashboardLayout>
       <div className="p-8 space-y-6">
@@ -92,7 +100,7 @@ const Company = () => {
               <span className="mr-2">ℹ️</span>
               Learn More
             </Button>
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button className="bg-primary hover:bg-primary/90" onClick={handleOpenModal}>
               <UserPlus className="w-4 h-4 mr-2" />
               Invite Employees
             </Button>
@@ -122,7 +130,7 @@ const Company = () => {
               <p className="text-muted-foreground mb-6 max-w-sm">
                 Get started by adding your first employee or integrating with your HRMS system.
               </p>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90" onClick={handleOpenModal}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Add Employee
               </Button>
@@ -136,6 +144,8 @@ const Company = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <CompanyModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </DashboardLayout>
   );
 };
