@@ -14,7 +14,8 @@ import {
   ArrowLeft, 
   CreditCard,
   Plus,
-  HelpCircle
+  HelpCircle,
+  Settings
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -145,10 +146,22 @@ const Cards = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{type} Overview</h3>
-        <Button size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Card
-        </Button>
+        <div className="flex items-center gap-2">
+          {type === "Employee Benefit Cards" && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/employee-benefits-automation")}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+          )}
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Card
+          </Button>
+        </div>
       </div>
       
       <div className="border rounded-lg overflow-hidden">

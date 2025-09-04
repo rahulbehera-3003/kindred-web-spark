@@ -9,6 +9,7 @@ import HRMSData from "./pages/HRMSData";
 import ExpenseApprovalPolicy from "./pages/ExpenseApprovalPolicy";
 import CardApprovalFlow from "./pages/CardApprovalFlow";
 import Cards from "./pages/Cards";
+import EmployeeBenefitsAutomation from "./pages/EmployeeBenefitsAutomation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/expense-approval-policy" element={<ExpenseApprovalPolicy />} />
           <Route path="/card-approval-flow" element={<CardApprovalFlow />} />
           <Route path="/cards" element={<Cards />} />
+          <Route path="/employee-benefits-automation" element={<EmployeeBenefitsAutomation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
