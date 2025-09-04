@@ -303,7 +303,15 @@ const HRMSData = () => {
             onClick={() => {
               console.log("Selected teams:", selectedTeams);
               console.log("Selected users:", selectedUsers);
-              // TODO: Navigate to next step or process selections
+              
+              // Navigate to expense approval policy page with data
+              navigate("/expense-approval-policy", { 
+                state: { 
+                  selectedTeams, 
+                  selectedUsers, 
+                  hrmsUsers 
+                } 
+              });
             }}
             className="bg-primary hover:bg-primary/90 disabled:opacity-50 px-8 py-3"
           >
