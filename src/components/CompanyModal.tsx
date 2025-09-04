@@ -5,10 +5,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Building2 } from "lucide-react";
+import { UserPlus, Building2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface CompanyModalProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface CompanyModalProps {
 export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleManualAdd = () => {
     onOpenChange(false);
@@ -25,6 +27,7 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
   };
 
   const handleHRMSIntegration = async () => {
+    setIsLoading(true);
     try {
       console.log("Fetching HRMS users from Supabase...");
       
@@ -52,12 +55,10 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
         });
       }
 
-      toast({
-        title: "HRMS Integration",
-        description: `Successfully fetched ${hrmsUsers?.length || 0} users from HRMS system. Check console for details.`,
-      });
-
+      // Navigate to HRMS data page with the fetched data
       onOpenChange(false);
+      navigate("/hrms-data", { state: { hrmsUsers } });
+
     } catch (error) {
       console.error("Unexpected error:", error);
       toast({
@@ -65,6 +66,8 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
         description: "An unexpected error occurred while fetching HRMS users.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,14 +84,23 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
           <Button
             onClick={handleHRMSIntegration}
             variant="outline"
-            className="w-full h-16 flex items-center gap-4 hover:bg-primary/10 border-2 hover:border-primary/30"
+            disabled={isLoading}
+            className="w-full h-16 flex items-center gap-4 hover:bg-primary/10 border-2 hover:border-primary/30 disabled:opacity-60"
           >
             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-primary" />
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              ) : (
+                <Building2 className="w-5 h-5 text-primary" />
+              )}
             </div>
             <div className="text-left">
-              <div className="font-medium text-foreground">Integrate with HRMS System</div>
-              <div className="text-sm text-muted-foreground">Connect your existing HR system</div>
+              <div className="font-medium text-foreground">
+                {isLoading ? "Connecting to HRMS..." : "Integrate with HRMS System"}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {isLoading ? "Fetching employee data..." : "Connect your existing HR system"}
+              </div>
             </div>
           </Button>
 
