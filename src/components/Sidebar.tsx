@@ -13,20 +13,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
-  { icon: Home, label: "Home", active: true },
-  { icon: Calculator, label: "Accounting" },
-  { icon: CreditCard, label: "Expenses" },
-  { icon: Zap, label: "Alaan Drop" },
-  { icon: Building, label: "Company" },
-  { icon: UserCheck, label: "Employee Hub" },
-  { icon: CreditCard, label: "Cards" },
-  { icon: BarChart3, label: "Analytics" },
-  { icon: FileText, label: "Bills", badge: "New" },
-  { icon: FileText, label: "Statements" },
-  { icon: Settings, label: "Settings" },
-  { icon: HelpCircle, label: "What's new" },
+  { icon: Home, label: "Home", path: "/" },
+  { icon: Calculator, label: "Accounting", path: "/accounting" },
+  { icon: CreditCard, label: "Expenses", path: "/expenses" },
+  { icon: Zap, label: "Alaan Drop", path: "/alaan-drop" },
+  { icon: Building, label: "Company", path: "/company" },
+  { icon: UserCheck, label: "Employee Hub", path: "/employee-hub" },
+  { icon: CreditCard, label: "Cards", path: "/cards" },
+  { icon: BarChart3, label: "Analytics", path: "/analytics" },
+  { icon: FileText, label: "Bills", path: "/bills", badge: "New" },
+  { icon: FileText, label: "Statements", path: "/statements" },
+  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: HelpCircle, label: "What's new", path: "/whats-new" },
 ];
 
 const languages = [
@@ -35,6 +36,9 @@ const languages = [
 ];
 
 export const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
     <div className="w-64 h-screen bg-dashboard-sidebar text-dashboard-sidebar-foreground flex flex-col">
       {/* Logo */}
@@ -72,9 +76,10 @@ export const Sidebar = () => {
           <Button
             key={item.label}
             variant="ghost"
+            onClick={() => navigate(item.path)}
             className={cn(
               "w-full justify-start px-6 py-3 text-dashboard-sidebar-foreground hover:bg-dashboard-sidebar-muted rounded-none",
-              item.active && "bg-dashboard-sidebar-accent text-primary"
+              location.pathname === item.path && "bg-dashboard-sidebar-accent text-primary"
             )}
           >
             <item.icon className="w-5 h-5 mr-3" />
