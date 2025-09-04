@@ -14,6 +14,7 @@ interface Employee {
   id: number;
   name: string;
   team: string;
+  email: string;
 }
 
 const CreateEmployeeBenefitCard = () => {
@@ -25,22 +26,8 @@ const CreateEmployeeBenefitCard = () => {
   
   const [formData, setFormData] = useState({
     userId: "",
-    cardHolderName: "",
-    cardNo: "",
-    expiryMM: "",
-    expiryYY: "",
-    cardType: "",
-    benefitType: ""
+    cardNickname: ""
   });
-
-  const benefitTypes = [
-    { value: "birthday", label: "Birthday Card" },
-    { value: "anniversary", label: "Work Anniversary Card" },
-    { value: "home_office", label: "Home Office Setup Card" },
-    { value: "wellness", label: "Wellness & Health Card" },
-    { value: "learning", label: "Learning & Development Card" },
-    { value: "team_building", label: "Team Building Card" }
-  ];
 
   useEffect(() => {
     fetchEmployees();
@@ -50,7 +37,7 @@ const CreateEmployeeBenefitCard = () => {
     try {
       const { data: users, error } = await (supabase as any)
         .from('hrms_users')
-        .select('id, name, team')
+        .select('id, name, team, email')
         .eq('is_added', true);
 
       if (error) {
@@ -73,15 +60,13 @@ const CreateEmployeeBenefitCard = () => {
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ 
       ...prev, 
-      [field]: value,
-      // Auto-set cardType based on benefitType
-      ...(field === 'benefitType' ? { cardType: `employee_benefit_${value}` } : {})
+      [field]: value
     }));
   };
 
   const handleSave = async () => {
     // Validate form
-    if (!formData.userId || !formData.cardHolderName || !formData.cardNo || !formData.expiryMM || !formData.expiryYY || !formData.benefitType) {
+    if (!formData.userId || !formData.cardNickname) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -93,16 +78,18 @@ const CreateEmployeeBenefitCard = () => {
     setIsSaving(true);
 
     try {
-      const { data, error } = await (supabase as any)
+      const selectedEmployee = employees.find(emp => emp.id === parseInt(formData.userId));
+      
+      const { error } = await (supabase as any)
         .from('cards')
         .insert([
           {
             user_id: parseInt(formData.userId),
-            card_holder_name: formData.cardHolderName,
-            card_no: formData.cardNo,
-            expiry_mm: parseInt(formData.expiryMM),
-            expiry_yy: parseInt(formData.expiryYY),
-            card_type: formData.cardType
+            card_holder_name: selectedEmployee?.name || '',
+            card_no: `****-****-****-${Math.floor(1000 + Math.random() * 9000)}`,
+            expiry_mm: 12,
+            expiry_yy: 25,
+            card_type: "employee_benefit"
           }
         ]);
 
@@ -187,7 +174,10 @@ const CreateEmployeeBenefitCard = () => {
                     <SelectContent>
                       {employees.map((employee) => (
                         <SelectItem key={employee.id} value={employee.id.toString()}>
-                          {employee.name} - {employee.team}
+                          <div className="flex flex-col">
+                            <span className="font-medium">{employee.name}</span>
+                            <span className="text-sm text-muted-foreground">{employee.email} • {employee.team}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -195,80 +185,20 @@ const CreateEmployeeBenefitCard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="benefitType">Benefit Type *</Label>
-                  <Select value={formData.benefitType} onValueChange={(value) => handleInputChange('benefitType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select benefit type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {benefitTypes.map((benefit) => (
-                        <SelectItem key={benefit.value} value={benefit.value}>
-                          {benefit.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cardHolderName">Card Holder Name *</Label>
+                  <Label htmlFor="cardNickname">Card Name *</Label>
                   <Input
-                    id="cardHolderName"
-                    value={formData.cardHolderName}
-                    onChange={(e) => handleInputChange('cardHolderName', e.target.value)}
-                    placeholder="Enter card holder name"
+                    id="cardNickname"
+                    value={formData.cardNickname}
+                    onChange={(e) => handleInputChange('cardNickname', e.target.value)}
+                    placeholder="Enter card name (e.g., Birthday Card, Wellness Card)"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cardNo">Card Number *</Label>
-                  <Input
-                    id="cardNo"
-                    value={formData.cardNo}
-                    onChange={(e) => handleInputChange('cardNo', e.target.value)}
-                    placeholder="Enter card number"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiryMM">Expiry Month *</Label>
-                    <Select value={formData.expiryMM} onValueChange={(value) => handleInputChange('expiryMM', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="MM" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                          <SelectItem key={month} value={month.toString().padStart(2, '0')}>
-                            {month.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="expiryYY">Expiry Year *</Label>
-                    <Select value={formData.expiryYY} onValueChange={(value) => handleInputChange('expiryYY', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="YY" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map((year) => (
-                          <SelectItem key={year} value={year.toString().slice(-2)}>
-                            {year.toString().slice(-2)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 pt-4">
                 <Button onClick={handleSave} disabled={isSaving}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isSaving ? 'Saving...' : 'Save Card'}
+                  {isSaving ? 'Creating Card...' : 'Create Card'}
                 </Button>
                 <Button variant="outline" onClick={() => navigate('/cards')}>
                   Cancel
