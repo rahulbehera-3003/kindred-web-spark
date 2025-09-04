@@ -11,6 +11,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
+interface TeamData {
+  id: number;
+  name: string;
+  created_at: string;
+  lead_user_id?: number;
+}
+
+interface TeamWithUsers extends TeamData {
+  users: UserWithCards[];
+}
+
+interface UserWithCards {
+  id: number;
+  name: string | null;
+  email: string | null;
+  team: string | null;
+  department: string | null;
+  designation: string | null;
+  manager_name: string | null;
+  user_status: boolean | null;
+  is_added: boolean | null;
+  cards: any[];
+}
+
 interface CompanyModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,59 +58,124 @@ export const CompanyModal = ({ open, onOpenChange }: CompanyModalProps) => {
       console.log("Supabase URL:", "https://rtxkgingsusqacsquzqs.supabase.co");
       console.log("Supabase client initialized:", !!supabase);
       
-      console.log("📡 Fetching HRMS users from Supabase...");
+      console.log("📡 Fetching teams and users from Supabase...");
       
-      const { data: hrmsUsers, error } = await supabase
-        .from('hrms_users')
+      // First, fetch all teams - use any cast to bypass TypeScript issues
+      const teamsResponse = await (supabase as any)
+        .from('teams')
         .select('*');
 
-      if (error) {
-        console.error("❌ Supabase connection failed or query error:", error);
-        console.error("Error details:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+      const { data: teams, error: teamsError } = teamsResponse;
+
+      if (teamsError) {
+        console.error("❌ Failed to fetch teams:", teamsError);
         toast({
           title: "Error",
-          description: "Failed to fetch HRMS users: " + error.message,
+          description: "Failed to fetch teams: " + teamsError.message,
           variant: "destructive",
         });
         return;
       }
 
-      console.log("✅ Supabase connection successful!");
-      console.log("📊 HRMS Users fetched successfully:", hrmsUsers);
-      console.log(`📈 Total users found: ${hrmsUsers?.length || 0}`);
-      
-      // Log each user for detailed inspection
-      if (hrmsUsers && hrmsUsers.length > 0) {
-        console.log("👥 User details:");
-        hrmsUsers.forEach((user, index) => {
-          console.log(`User ${index + 1}:`, {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            team: user.team,
-            department: user.department,
-            status: user.user_status ? 'Active' : 'Inactive'
-          });
+      console.log("✅ Teams fetched successfully:", teams);
+      console.log(`📈 Total teams found: ${teams?.length || 0}`);
+
+      if (!teams || teams.length === 0) {
+        console.log("⚠️ No teams found in teams table");
+        toast({
+          title: "No Teams Found",
+          description: "No teams found in the database. Please add teams first.",
+          variant: "destructive",
         });
-      } else {
-        console.log("⚠️ No users found in hrms_users table");
+        return;
       }
 
-      // Navigate to HRMS data page with the fetched data
+      // For each team, fetch users where is_added = true and team matches team name
+      const teamsWithUsers: TeamWithUsers[] = [];
+      
+      for (const teamData of teams as TeamData[]) {
+        console.log(`👥 Fetching users for team: ${teamData.name}`);
+        
+        const { data: users, error: usersError } = await (supabase as any)
+          .from('hrms_users')
+          .select('*')
+          .eq('team', teamData.name)
+          .eq('is_added', true);
+
+        if (usersError) {
+          console.error(`❌ Failed to fetch users for team ${teamData.name}:`, usersError);
+          teamsWithUsers.push({
+            ...teamData,
+            users: []
+          });
+          continue;
+        }
+
+        console.log(`📊 Users found for team ${teamData.name}:`, users?.length || 0);
+
+        // For each user, fetch their cards
+        const usersWithCards: UserWithCards[] = [];
+        
+        if (users && users.length > 0) {
+          for (const userData of users as any[]) {
+            console.log(`💳 Fetching cards for user: ${userData.name} (ID: ${userData.id})`);
+            
+            // Fetch cards using any cast to bypass TypeScript issues
+            const cardsResponse = await (supabase as any)
+              .from('cards')
+              .select('*')
+              .eq('user_id', userData.id);
+
+            const { data: cards, error: cardsError } = cardsResponse;
+
+            if (cardsError) {
+              console.error(`❌ Failed to fetch cards for user ${userData.id}:`, cardsError);
+            }
+
+            console.log(`💳 Cards found for user ${userData.name}:`, cards?.length || 0);
+
+            usersWithCards.push({
+              id: userData.id,
+              name: userData.name,
+              email: userData.email,
+              team: userData.team,
+              department: userData.department,
+              designation: userData.designation,
+              manager_name: userData.manager_name,
+              user_status: userData.user_status,
+              is_added: userData.is_added,
+              cards: cards || []
+            });
+          }
+        }
+
+        teamsWithUsers.push({
+          ...teamData,
+          users: usersWithCards
+        });
+      }
+
+      console.log("✅ Complete team structure fetched successfully!");
+      console.log("📊 Teams with users and cards:", teamsWithUsers);
+      
+      // Log summary
+      const totalUsers = teamsWithUsers.reduce((sum, team) => sum + team.users.length, 0);
+      const totalCards = teamsWithUsers.reduce((sum, team) => 
+        sum + team.users.reduce((userSum, user) => userSum + (user.cards?.length || 0), 0), 0
+      );
+      
+      console.log(`📈 Summary: ${teamsWithUsers.length} teams, ${totalUsers} users, ${totalCards} cards`);
+
+      // Navigate to HRMS data page with the structured data
       onOpenChange(false);
-      navigate("/hrms-data", { state: { hrmsUsers } });
+      navigate("/hrms-data", { state: { teams: teamsWithUsers } });
 
     } catch (error) {
       console.error("💥 Unexpected error during Supabase operation:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace available');
       toast({
         title: "Error",
-        description: "An unexpected error occurred while fetching HRMS users.",
+        description: "An unexpected error occurred while fetching HRMS data.",
         variant: "destructive",
       });
     } finally {

@@ -25,6 +25,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
+interface TeamWithUsers {
+  id: number;
+  name: string;
+  users: HRMSUser[];
+}
+
 interface HRMSUser {
   id: number;
   name: string;
@@ -36,6 +42,7 @@ interface HRMSUser {
   manager_name: string;
   company_joining_date: string;
   user_status: boolean;
+  cards?: any[];
 }
 
 const HRMSData = () => {
@@ -47,12 +54,36 @@ const HRMSData = () => {
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
 
   useEffect(() => {
-    const users: HRMSUser[] = location.state?.hrmsUsers || [];
-    setHrmsUsers(users);
-    
-    // Extract unique teams
-    const uniqueTeams = [...new Set(users.map((user: HRMSUser) => user.team).filter((team): team is string => Boolean(team)))];
-    setTeams(uniqueTeams);
+    // Handle both old format (hrmsUsers) and new format (teams)
+    if (location.state?.teams) {
+      // New teams-based structure
+      const teamsData: TeamWithUsers[] = location.state.teams;
+      console.log("📊 Processing teams data:", teamsData);
+      
+      // Extract all users from all teams into a flat array
+      const allUsers: HRMSUser[] = teamsData.flatMap(team => team.users || []);
+      setHrmsUsers(allUsers);
+      
+      // Extract team names
+      const teamNames = teamsData.map(team => team.name);
+      setTeams(teamNames);
+      
+      console.log(`📈 Extracted ${allUsers.length} users from ${teamNames.length} teams`);
+    } else if (location.state?.hrmsUsers) {
+      // Backward compatibility: old format with flat user array
+      const users: HRMSUser[] = location.state.hrmsUsers || [];
+      setHrmsUsers(users);
+      
+      // Extract unique teams from user data
+      const uniqueTeams = [...new Set(users.map((user: HRMSUser) => user.team).filter((team): team is string => Boolean(team)))];
+      setTeams(uniqueTeams);
+      
+      console.log("📊 Using legacy format - users:", users.length, "teams:", uniqueTeams.length);
+    } else {
+      console.log("⚠️ No data found in location state");
+      setHrmsUsers([]);
+      setTeams([]);
+    }
   }, [location.state]);
 
   const getInitials = (name: string) => {
