@@ -101,10 +101,10 @@ const Company = () => {
         {/* Tabs */}
         <Tabs defaultValue="employees" className="space-y-6">
           <TabsList className="grid w-fit grid-cols-2 bg-muted">
-            <TabsTrigger value="employees" className="data-[state=active]:bg-primary/20 hover:bg-primary/20">
+            <TabsTrigger value="employees" className="data-[state=active]:bg-transparent hover:bg-primary/20">
               Employees
             </TabsTrigger>
-            <TabsTrigger value="teams" className="data-[state=active]:bg-primary/20 hover:bg-primary/20">
+            <TabsTrigger value="teams" className="data-[state=active]:bg-transparent hover:bg-primary/20">
               Teams
             </TabsTrigger>
           </TabsList>
