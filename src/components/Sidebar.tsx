@@ -14,8 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CompanyModal } from "./CompanyModal";
-import { useState } from "react";
 
 const menuItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -40,14 +38,9 @@ const languages = [
 export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [companyModalOpen, setCompanyModalOpen] = useState(false);
 
   const handleMenuClick = (item: typeof menuItems[0]) => {
-    if (item.label === "Company") {
-      setCompanyModalOpen(true);
-    } else {
-      navigate(item.path);
-    }
+    navigate(item.path);
   };
 
   return (
@@ -119,12 +112,6 @@ export const Sidebar = () => {
           💰 Earn 2,500 AED
         </div>
       </div>
-
-      {/* Company Modal */}
-      <CompanyModal 
-        open={companyModalOpen}
-        onOpenChange={setCompanyModalOpen}
-      />
     </div>
   );
 };
